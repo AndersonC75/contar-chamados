@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contador de Chamados</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171d2b; --panel2:#1e2536; --border:#2a3348;
+    --text:#e8ecf5; --muted:#8a94ab; --accent:#4f8cff; --green:#3ecf8e;
+    --amber:#f0b429; --red:#f0546b; --red-bg:#3a1c24;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);padding:24px;}
+  h1{font-size:22px;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:13px;margin-bottom:20px;}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .card h3{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .card .big{font-size:26px;font-weight:700;}
+  .card .rows{display:flex;gap:14px;margin-top:6px;font-size:13px;color:var(--muted);}
+  .card .rows b{color:var(--text);}
+  form.entry{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:4px;}
+  .field label{font-size:12px;color:var(--muted);}
+  input,select,textarea{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:14px;}
+  input#numero{font-size:18px;font-weight:600;min-width:220px;}
+  button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:14px;cursor:pointer;font-weight:600;}
+  button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
+  button.small{padding:5px 10px;font-size:12px;}
+  button.danger{background:var(--red);}
+  section{margin-bottom:24px;}
+  section h2{font-size:15px;margin:0 0 10px;color:var(--text);display:flex;align-items:center;gap:10px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;}
+  tr:last-child td{border-bottom:none;}
+  tr.overdue td{background:var(--red-bg);}
+  .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;}
+  .badge.encerrado{background:#132a3f;color:var(--accent);}
+  .statusSelect{border-radius:12px;font-size:12px;font-weight:600;padding:3px 8px;border:none;cursor:pointer;}
+  .statusSelect.andamento{background:#232b3d;color:#9fb3d9;}
+  .statusSelect.aguardando{background:#2e2440;color:#c9a6f0;}
+  .statusSelect.resolvido{background:#123a2c;color:var(--green);}
+  .statusSelect.transferido{background:#3a2f10;color:var(--amber);}
+  .day-group{margin-bottom:14px;}
+  .day-group h4{font-size:13px;color:var(--muted);margin:0 0 6px;}
+  .toolbar{display:flex;gap:8px;margin-bottom:16px;}
+  .empty{color:var(--muted);font-size:13px;padding:10px 0;}
+  .copybtn{cursor:pointer;color:var(--accent);font-size:12px;margin-left:6px;background:none;border:none;padding:0;font-weight:600;}
+  .retorno-actions button{margin-left:4px;}
+</style>
+</head>
+<body>
+
+<h1>Contador de Chamados</h1>
+<div class="sub">Backup automático em JSON (baixa sozinho, sem precisar clicar). Ao virar o mês, chamados já resolvidos/transferidos são arquivados e a lista começa limpa; os que ainda estão em andamento continuam aparecendo.</div>
+
+<div class="grid" id="summaryCards"></div>
+
+<form class="entry" id="entryForm">
+  <div class="field">
+    <label>Número do chamado</label>
+    <input id="numero" autocomplete="off" placeholder="Cole ou digite o número" required>
+  </div>
+  <div class="field">
+    <label>Status</label>
+    <select id="status">
+      <option value="andamento" selected>Em andamento</option>
+      <option value="aguardando">Aguardando solicitante</option>
+      <option value="resolvido">Resolvido</option>
+      <option value="transferido">Transferido de fila</option>
+    </select>
+  </div>
+  <div class="field" id="filaField" style="display:none;">
+    <label>Fila destino</label>
+    <input id="fila" placeholder="Ex: N2 Redes">
+  </div>
+  <div class="field">
+    <label>Agendar retorno (opcional)</label>
+    <input type="datetime-local" id="retorno">
+  </div>
+  <div class="field">
+    <label>Observação (opcional)</label>
+    <input id="obs" placeholder="Nota rápida">
+  </div>
+  <button type="submit">Adicionar</button>
+</form>
+
+<section>
+  <h2>Chamados <button class="secondary small" id="enableAlerts">🔔 Ativar som e notificações</button></h2>
+  <div id="lista"></div>
+</section>
+
+<div class="toolbar">
+  <button class="secondary small" id="importJson">Importar Backup</button>
+  <button class="danger small" id="clearAll">Limpar tudo</button>
+  <input type="file" id="fileInput" accept=".json" style="display:none;">
+</div>
+
+<script>
+const KEY = 'chamados_v1';
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; }
+}
+function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
+
+function downloadJson(data, filename){
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+let entries = load();
+checkMonthRollover();
+
+function checkMonthRollover(){
+  const nowMonth = new Date().toISOString().slice(0,7);
+  const activeMonth = localStorage.getItem('chamados_activeMonth');
+  if(!activeMonth){
+    localStorage.setItem('chamados_activeMonth', nowMonth);
+    return;
+  }
+  if(activeMonth === nowMonth) return;
+  const ABERTOS = ['andamento','aguardando'];
+  const finalizados = entries.filter(e=>!ABERTOS.includes(e.status));
+  const emAberto = entries.filter(e=>ABERTOS.includes(e.status));
+  if(finalizados.length){
+    downloadJson(finalizados, 'chamados_'+activeMonth+'.json');
+    const year = activeMonth.slice(0,4);
+    const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
+    stats[year] = stats[year] || {resolvidos:0, transferidos:0};
+    stats[year].resolvidos += finalizados.filter(e=>e.status==='resolvido').length;
+    stats[year].transferidos += finalizados.filter(e=>e.status==='transferido').length;
+    localStorage.setItem('chamados_archiveStats', JSON.stringify(stats));
+  }
+  entries = emAberto;
+  save(entries);
+  localStorage.setItem('chamados_activeMonth', nowMonth);
+}
+
+function archiveStatsForYear(year){
+  const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
+  return stats[year] || {resolvidos:0, transferidos:0};
+}
+function archiveStatsAll(){
+  const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
+  let resolvidos=0, transferidos=0;
+  Object.values(stats).forEach(s=>{ resolvidos+=s.resolvidos; transferidos+=s.transferidos; });
+  return {resolvidos, transferidos};
+}
+
+function fmtDateTime(iso){
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',weekday:'short'});
+}
+function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+function sameMonth(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth(); }
+function sameYear(a,b){ return a.getFullYear()===b.getFullYear(); }
+
+function counts(filterFn){
+  const filtered = entries.filter(e => filterFn(new Date(e.criadoEm)));
+  const resolvidos = filtered.filter(e=>e.status==='resolvido').length;
+  const transferidos = filtered.filter(e=>e.status==='transferido').length;
+  const andamento = filtered.filter(e=>e.status==='andamento').length;
+  const aguardando = filtered.filter(e=>e.status==='aguardando').length;
+  return { total: filtered.length, resolvidos, transferidos, andamento, aguardando };
+}
+
+function renderSummary(){
+  const now = new Date();
+  const hoje = counts(d=>sameDay(d,now));
+  const mes = counts(d=>sameMonth(d,now));
+
+  const liveAno = counts(d=>sameYear(d,now));
+  const archAno = archiveStatsForYear(String(now.getFullYear()));
+  const ano = {
+    total: liveAno.total + archAno.resolvidos + archAno.transferidos,
+    resolvidos: liveAno.resolvidos + archAno.resolvidos,
+    transferidos: liveAno.transferidos + archAno.transferidos,
+    andamento: liveAno.andamento,
+    aguardando: liveAno.aguardando
+  };
+
+  const liveGeral = counts(()=>true);
+  const archGeral = archiveStatsAll();
+  const geral = {
+    total: liveGeral.total + archGeral.resolvidos + archGeral.transferidos,
+    resolvidos: liveGeral.resolvidos + archGeral.resolvidos,
+    transferidos: liveGeral.transferidos + archGeral.transferidos,
+    andamento: liveGeral.andamento,
+    aguardando: liveGeral.aguardando
+  };
+
+  const cards = [
+    ['Hoje', hoje], ['Este mês', mes], ['Este ano', ano], ['Total geral', geral]
+  ];
+  document.getElementById('summaryCards').innerHTML = cards.map(([label,c])=>`
+    <div class="card">
+      <h3>${label}</h3>
+      <div class="big">${c.total}</div>
+      <div class="rows"><span>Andamento: <b>${c.andamento}</b></span><span>Aguardando: <b>${c.aguardando}</b></span><span>Resolvidos: <b>${c.resolvidos}</b></span><span>Transferidos: <b>${c.transferidos}</b></span></div>
+    </div>
+  `).join('');
+}
+
+function renderLista(){
+  const el = document.getElementById('lista');
+  if(!entries.length){ el.innerHTML = '<div class="empty">Nenhum chamado registrado.</div>'; return; }
+  const now = new Date();
+  const byDay = {};
+  entries.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm)).forEach(e=>{
+    const key = fmtDate(e.criadoEm);
+    (byDay[key] = byDay[key] || []).push(e);
+  });
+  el.innerHTML = Object.keys(byDay).map(day=>{
+    const rows = byDay[day].map(e=>{
+      const overdue = !!(e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now);
+      let retornoCell;
+      if(e.encerradoEm){
+        retornoCell = '<span class="badge encerrado">Encerrado '+fmtDateTime(e.encerradoEm)+'</span>';
+      } else if(e.retornoEm){
+        retornoCell = (overdue ? '<b style="color:var(--red)">Venceu '+fmtDateTime(e.retornoEm)+'</b>' : fmtDateTime(e.retornoEm))
+          + '<span class="retorno-actions">'
+          + '<button class="secondary small" onclick="encerrar(\''+e.id+'\')">Encerrar</button>'
+          + '<button class="secondary small" onclick="adiar(\''+e.id+'\')">Adiar 1h</button>'
+          + '</span>';
+      } else {
+        retornoCell = '—';
+      }
+      return `<tr class="${overdue?'overdue':''}">
+        <td>${new Date(e.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</td>
+        <td>${e.numero}<button class="copybtn" onclick="copyNum('${e.numero}')">copiar</button></td>
+        <td>
+          <select class="statusSelect ${e.status}" onchange="changeStatus('${e.id}', this.value)">
+            <option value="andamento" ${e.status==='andamento'?'selected':''}>Em andamento</option>
+            <option value="aguardando" ${e.status==='aguardando'?'selected':''}>Aguardando solicitante</option>
+            <option value="resolvido" ${e.status==='resolvido'?'selected':''}>Resolvido</option>
+            <option value="transferido" ${e.status==='transferido'?'selected':''}>Transferido</option>
+          </select>
+        </td>
+        <td>${e.fila||''}</td>
+        <td>${retornoCell}</td>
+        <td>${e.obs||''}</td>
+        <td><button class="secondary small" onclick="removeEntry('${e.id}')">Excluir</button></td>
+      </tr>`;
+    }).join('');
+    return `<div class="day-group"><h4>${day}</h4><table>
+      <thead><tr><th>Hora</th><th>Número</th><th>Status</th><th>Fila</th><th>Retorno</th><th>Obs.</th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  }).join('');
+}
+
+function renderAll(){ renderSummary(); renderLista(); }
+
+function beep(){
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.value = 0.15;
+    o.start();
+    setTimeout(()=>{ o.stop(); ctx.close(); }, 350);
+  }catch(e){}
+}
+
+const alertedIds = new Set();
+function checkAlarms(){
+  const now = new Date();
+  entries
+    .filter(e => e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now && !alertedIds.has(e.id))
+    .forEach(e=>{
+      alertedIds.add(e.id);
+      beep();
+      if('Notification' in window && Notification.permission === 'granted'){
+        new Notification('Chamado aguardando retorno', { body: 'Chamado '+e.numero+(e.fila?' · fila: '+e.fila:'') });
+      }
+    });
+}
+setInterval(checkAlarms, 30000);
+checkAlarms();
+
+document.getElementById('enableAlerts').addEventListener('click', ()=>{
+  beep();
+  if('Notification' in window && Notification.permission !== 'granted'){
+    Notification.requestPermission();
+  }
+});
+
+function maybeAutoBackup(){
+  const today = new Date().toISOString().slice(0,10);
+  const last = localStorage.getItem('chamados_lastBackup');
+  if(last !== today && entries.length){
+    downloadJson(entries, 'chamados_backup_'+today+'.json');
+    localStorage.setItem('chamados_lastBackup', today);
+  }
+}
+
+function copyNum(numero){
+  navigator.clipboard && navigator.clipboard.writeText(numero);
+}
+
+function changeStatus(id, newStatus){
+  const e = entries.find(x=>x.id===id);
+  if(!e) return;
+  e.status = newStatus;
+  if(newStatus==='transferido' && !e.fila){
+    const fila = prompt('Fila destino (opcional):','');
+    if(fila) e.fila = fila.trim();
+  }
+  save(entries); renderAll();
+}
+
+function encerrar(id){
+  const e = entries.find(x=>x.id===id);
+  if(e){ e.encerradoEm = new Date().toISOString(); save(entries); renderAll(); }
+}
+function adiar(id){
+  const e = entries.find(x=>x.id===id);
+  if(e){
+    const base = e.retornoEm ? new Date(e.retornoEm) : new Date();
+    base.setHours(base.getHours()+1);
+    e.retornoEm = base.toISOString();
+    save(entries); renderAll();
+  }
+}
+function removeEntry(id){
+  if(!confirm('Excluir este registro?')) return;
+  entries = entries.filter(e=>e.id!==id);
+  save(entries); renderAll();
+}
+
+document.getElementById('status').addEventListener('change', (ev)=>{
+  document.getElementById('filaField').style.display = ev.target.value==='transferido' ? 'flex' : 'none';
+});
+
+document.getElementById('entryForm').addEventListener('submit', (ev)=>{
+  ev.preventDefault();
+  const numero = document.getElementById('numero').value.trim();
+  if(!numero) return;
+  const status = document.getElementById('status').value;
+  const fila = document.getElementById('fila').value.trim();
+  const retorno = document.getElementById('retorno').value;
+  const obs = document.getElementById('obs').value.trim();
+  entries.push({
+    id: 'id'+Date.now()+Math.random().toString(36).slice(2,7),
+    numero, status, fila: fila||null,
+    obs: obs||null,
+    criadoEm: new Date().toISOString(),
+    retornoEm: retorno ? new Date(retorno).toISOString() : null,
+    encerradoEm: null
+  });
+  save(entries);
+  document.getElementById('numero').value='';
+  document.getElementById('fila').value='';
+  document.getElementById('retorno').value='';
+  document.getElementById('obs').value='';
+  document.getElementById('numero').focus();
+  renderAll();
+  maybeAutoBackup();
+});
+
+document.getElementById('importJson').addEventListener('click', ()=>{
+  document.getElementById('fileInput').click();
+});
+document.getElementById('fileInput').addEventListener('change', (ev)=>{
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const imported = JSON.parse(reader.result);
+      if(Array.isArray(imported)){
+        entries = entries.concat(imported.filter(x=>x && x.id && !entries.some(e=>e.id===x.id)));
+        save(entries); renderAll();
+        alert('Backup importado com sucesso.');
+      }
+    }catch(e){ alert('Arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('clearAll').addEventListener('click', ()=>{
+  if(!confirm('Isso vai apagar TODOS os registros deste navegador. Tem certeza?')) return;
+  entries = [];
+  save(entries); renderAll();
+});
+
+renderAll();
+</script>
+</body>
+</html>
