@@ -76,7 +76,7 @@
     <label>Fila destino</label>
     <input id="fila" placeholder="Ex: N2 Redes">
   </div>
-  <div class="field">
+  <div class="field" id="retornoField">
     <label>Agendar retorno (opcional)</label>
     <input type="datetime-local" id="retorno">
   </div>
@@ -222,9 +222,11 @@ function renderLista(){
   });
   el.innerHTML = Object.keys(byDay).map(day=>{
     const rows = byDay[day].map(e=>{
-      const overdue = !!(e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now);
+      const overdue = !!(e.status!=='transferido' && e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now);
       let retornoCell;
-      if(e.encerradoEm){
+      if(e.status==='transferido'){
+        retornoCell = '—';
+      } else if(e.encerradoEm){
         retornoCell = '<span class="badge encerrado">Encerrado '+fmtDateTime(e.encerradoEm)+'</span>';
       } else if(e.retornoEm){
         retornoCell = (overdue ? '<b style="color:var(--red)">Venceu '+fmtDateTime(e.retornoEm)+'</b>' : fmtDateTime(e.retornoEm))
@@ -277,7 +279,7 @@ const alertedIds = new Set();
 function checkAlarms(){
   const now = new Date();
   entries
-    .filter(e => e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now && !alertedIds.has(e.id))
+    .filter(e => e.status!=='transferido' && e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now && !alertedIds.has(e.id))
     .forEach(e=>{
       alertedIds.add(e.id);
       beep();
@@ -313,9 +315,12 @@ function changeStatus(id, newStatus){
   const e = entries.find(x=>x.id===id);
   if(!e) return;
   e.status = newStatus;
-  if(newStatus==='transferido' && !e.fila){
-    const fila = prompt('Fila destino (opcional):','');
-    if(fila) e.fila = fila.trim();
+  if(newStatus==='transferido'){
+    if(!e.fila){
+      const fila = prompt('Fila destino (opcional):','');
+      if(fila) e.fila = fila.trim();
+    }
+    e.retornoEm = null;
   }
   save(entries); renderAll();
 }
@@ -340,7 +345,10 @@ function removeEntry(id){
 }
 
 document.getElementById('status').addEventListener('change', (ev)=>{
-  document.getElementById('filaField').style.display = ev.target.value==='transferido' ? 'flex' : 'none';
+  const isTransferido = ev.target.value==='transferido';
+  document.getElementById('filaField').style.display = isTransferido ? 'flex' : 'none';
+  document.getElementById('retornoField').style.display = isTransferido ? 'none' : 'flex';
+  if(isTransferido) document.getElementById('retorno').value = '';
 });
 
 document.getElementById('entryForm').addEventListener('submit', (ev)=>{
