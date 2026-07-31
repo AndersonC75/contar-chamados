@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contador de Chamados</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%AB</text></svg>">
 <style>
   :root{
     --bg:#0f1420; --panel:#171d2b; --panel2:#1e2536; --border:#2a3348;
@@ -89,6 +90,7 @@
 
 <section>
   <h2>Chamados <button class="secondary small" id="enableAlerts">🔔 Ativar som e notificações</button></h2>
+  <input id="searchNum" placeholder="Buscar por número do chamado..." style="width:100%;margin-bottom:12px;">
   <div id="lista"></div>
 </section>
 
@@ -211,12 +213,19 @@ function renderSummary(){
   `).join('');
 }
 
+let searchTerm = '';
+
 function renderLista(){
   const el = document.getElementById('lista');
-  if(!entries.length){ el.innerHTML = '<div class="empty">Nenhum chamado registrado.</div>'; return; }
+  const term = searchTerm.trim().toLowerCase();
+  const filtered = term ? entries.filter(e => e.numero.toLowerCase().includes(term)) : entries;
+  if(!filtered.length){
+    el.innerHTML = '<div class="empty">'+(term ? 'Nenhum chamado encontrado.' : 'Nenhum chamado registrado.')+'</div>';
+    return;
+  }
   const now = new Date();
   const byDay = {};
-  entries.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm)).forEach(e=>{
+  filtered.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm)).forEach(e=>{
     const key = fmtDate(e.criadoEm);
     (byDay[key] = byDay[key] || []).push(e);
   });
@@ -290,6 +299,11 @@ function checkAlarms(){
 }
 setInterval(checkAlarms, 30000);
 checkAlarms();
+
+document.getElementById('searchNum').addEventListener('input', (ev)=>{
+  searchTerm = ev.target.value;
+  renderLista();
+});
 
 document.getElementById('enableAlerts').addEventListener('click', ()=>{
   beep();
