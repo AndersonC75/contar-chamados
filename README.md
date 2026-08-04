@@ -1,23 +1,48 @@
 # Contador de Chamados
 
-Página HTML local para registrar chamados atendidos (Topdesk ou qualquer outra plataforma), sem precisar de servidor, instalação ou internet — só abrir o `index.html` no navegador.
+Registra chamados atendidos (Topdesk ou qualquer outra plataforma). Interface no navegador, dados salvos automaticamente em `chamados.json` **nesta pasta de rede** — qualquer computador do trabalho vê os mesmos chamados. Nenhum backup manual é necessário.
+
+## Como abrir
+
+Dê duplo clique em **`Abrir Contador.bat`**. O navegador abre sozinho em alguns segundos com tudo carregado — sem escolher arquivo, sem importar nada.
+
+O `.bat` inicia um pequeno servidor local (PowerShell, já vem no Windows — nada é instalado) que grava os chamados direto no arquivo da rede a cada mudança. O rodapé da página mostra o estado:
+
+- 🟢 Salvamento automático na rede — tudo certo.
+- 🔴 Falha ao salvar — a rede caiu; os dados ficam guardados no navegador até voltar.
+- 🟡 Aberto sem o `.bat` — funciona, mas salva só naquele navegador (um backup é baixado automaticamente 1× por dia como segurança).
 
 ## Como usar
 
-1. Abra `index.html` com duplo clique (ou arraste para o navegador).
-2. Cole o número do chamado no campo e aperte Enter.
-3. O status inicial é sempre **Em andamento** — depois você atualiza para **Aguardando solicitante**, **Resolvido** ou **Transferido de fila** direto na lista, quando souber o desfecho.
-4. Se quiser ser lembrado de voltar num chamado, preencha "Agendar retorno" — ele aparece destacado em vermelho quando vence o prazo, com bipe sonoro e notificação do navegador (clique em "🔔 Ativar som e notificações" uma vez para habilitar).
+1. Cole o número do chamado e aperte Enter.
+2. O status inicial é **Em andamento** — depois atualize para **Aguardando solicitante**, **Resolvido** ou **Transferido** direto na lista.
+3. Para lembrar de voltar num chamado, preencha "Agendar retorno" — quando vence, a linha fica vermelha, com bipe e notificação (ative uma vez no botão 🔔).
+4. Números repetidos são avisados na hora; cada mês vira uma aba; a busca procura em todos os meses.
 
-## Contagem
+## 📄 Relatório do mês
 
-Os cards no topo mostram o total de chamados — e o total separado por status — em quatro janelas: hoje, este mês, este ano e desde sempre.
+O botão **"Relatório do mês"** gera um documento limpo só com as informações do mês da aba selecionada: resumo por status, chamados por dia e a lista completa. Dali você pode:
 
-## Dados e backup
+- **🖨 Salvar como PDF** — abre a impressão; escolha "Salvar como PDF".
+- **⬇ Baixar Word** — baixa um `.doc` pronto para editar.
 
-- Tudo fica salvo no `localStorage` do navegador, neste computador. Não sincroniza entre máquinas.
-- Um backup em JSON é baixado automaticamente uma vez por dia, ao adicionar o primeiro chamado do dia.
-- Quando o mês vira, os chamados já **Resolvidos**/**Transferidos** são arquivados automaticamente (baixa um JSON com o mês fechado) e a lista some daquele mês; os que ainda estão **Em andamento** ou **Aguardando solicitante** continuam aparecendo, para nada ficar esquecido.
-- Use "Importar Backup" para restaurar um arquivo `.json` salvo anteriormente.
+## Dados e backup (tudo automático)
 
-Os arquivos de backup (`chamados_*.json`) não entram neste repositório — ficam só na máquina local, já que contêm dados reais de atendimento.
+- **Fonte única:** `chamados.json` nesta pasta de rede, atualizado a cada mudança (gravação atômica — nunca fica corrompido pela metade).
+- **Backup diário automático:** antes da primeira gravação de cada dia, o estado anterior é copiado para `backups\chamados_AAAA-MM-DD.json`.
+- **Restaurar um backup:** feche o navegador, copie o arquivo desejado de `backups\` por cima de `chamados.json` (renomeando), e abra de novo pelo `.bat`.
+- Evite usar em dois computadores **ao mesmo tempo** — a última gravação vence.
+
+## Arquivos
+
+| Arquivo | Função |
+|---|---|
+| `Abrir Contador.bat` | Atalho para abrir o sistema |
+| `server.ps1` | Servidor local que grava na rede (iniciado pelo .bat) |
+| `index.html` | Interface |
+| `chamados.json` | **Seus dados** (não apagar!) |
+| `backups\` | Cópias diárias automáticas |
+
+## Privacidade
+
+`chamados.json`, `backups\` e os `chamados_*.json` não entram no repositório git — contêm dados reais de atendimento.

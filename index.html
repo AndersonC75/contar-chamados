@@ -7,152 +7,188 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%AB</text></svg>">
 <style>
   :root{
-    --bg:#0f1420; --panel:#171d2b; --panel2:#1e2536; --border:#2a3348;
-    --text:#e8ecf5; --muted:#8a94ab; --accent:#4f8cff; --green:#3ecf8e;
-    --amber:#f0b429; --red:#f0546b; --red-bg:#3a1c24;
+    --bg:#0d1117; --panel:#161c27; --panel2:#1f2735; --border:#2c3648;
+    --text:#e9edf5; --muted:#93a0b8; --accent:#4f8cff; --accent2:#6ea2ff;
+    --green:#3ecf8e; --amber:#f0b429; --red:#f0546b; --red-bg:#3a1c24;
+    --purple:#b18aec;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text);padding:24px;}
-  h1{font-size:22px;margin:0 0 4px;}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:20px;}
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
-  .card h3{margin:0 0 8px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
-  .card .big{font-size:26px;font-weight:700;}
-  .card .rows{display:flex;gap:14px;margin-top:6px;font-size:13px;color:var(--muted);}
+  body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .container{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+
+  header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+  h1{font-size:26px;margin:0;letter-spacing:-.02em;}
+  .tagline{color:var(--muted);font-size:13px;}
+
+  /* ---------- cards ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:22px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden;}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+  .card.c2::before{background:var(--purple);} .card.c3::before{background:var(--green);} .card.c4::before{background:var(--amber);}
+  .card h3{margin:0 0 6px;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;}
+  .card .big{font-size:32px;font-weight:800;line-height:1;}
+  .card .rows{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted);}
   .card .rows b{color:var(--text);}
-  form.entry{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
-  .field{display:flex;flex-direction:column;gap:4px;}
-  .field label{font-size:12px;color:var(--muted);}
-  input,select,textarea{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:14px;}
-  input#numero{font-size:18px;font-weight:600;min-width:220px;}
-  button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:9px 16px;font-size:14px;cursor:pointer;font-weight:600;}
+
+  /* ---------- formulário ---------- */
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:22px;}
+  .panel h2{margin:0 0 14px;font-size:15px;}
+  form.entry{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-size:12px;color:var(--muted);font-weight:600;}
+  input,select{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 11px;font-size:14px;outline:none;}
+  input:focus,select:focus{border-color:var(--accent);}
+  input#numero{font-size:17px;font-weight:700;min-width:210px;}
+  .dup-warning{display:none;width:100%;font-size:13px;color:var(--amber);background:rgba(240,180,41,.08);border:1px solid rgba(240,180,41,.3);border-radius:8px;padding:8px 12px;}
+
+  button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:14px;cursor:pointer;font-weight:600;transition:filter .15s;}
+  button:hover{filter:brightness(1.12);}
   button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border);}
-  button.small{padding:5px 10px;font-size:12px;}
-  button.danger{background:var(--red);}
-  section{margin-bottom:24px;}
-  section h2{font-size:15px;margin:0 0 10px;color:var(--text);display:flex;align-items:center;gap:10px;}
-  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
-  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;}
+  button.green{background:var(--green);color:#08221a;}
+  button.small{padding:6px 12px;font-size:12.5px;}
+  button.danger{background:transparent;color:var(--red);border:1px solid var(--red);}
+
+  /* ---------- lista ---------- */
+  section h2{font-size:16px;margin:0 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .tab{background:var(--panel2);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:13px;cursor:pointer;text-transform:capitalize;}
+  .tab.active{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;}
+  #searchNum{width:100%;margin-bottom:14px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;background:var(--panel2);}
   tr:last-child td{border-bottom:none;}
   tr.overdue td{background:var(--red-bg);}
-  .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;}
-  .badge.encerrado{background:#132a3f;color:var(--accent);}
-  .statusSelect{border-radius:12px;font-size:12px;font-weight:600;padding:3px 8px;border:none;cursor:pointer;}
+  .badge{display:inline-block;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;background:#132a3f;color:var(--accent2);}
+  .statusSelect{border-radius:14px;font-size:12px;font-weight:600;padding:4px 9px;border:none;cursor:pointer;}
   .statusSelect.andamento{background:#232b3d;color:#9fb3d9;}
   .statusSelect.aguardando{background:#2e2440;color:#c9a6f0;}
   .statusSelect.resolvido{background:#123a2c;color:var(--green);}
   .statusSelect.transferido{background:#3a2f10;color:var(--amber);}
-  .day-group{margin-bottom:14px;}
-  .day-group h4{font-size:13px;color:var(--muted);margin:0 0 6px;}
-  .toolbar{display:flex;gap:8px;margin-bottom:16px;}
-  .empty{color:var(--muted);font-size:13px;padding:10px 0;}
-  .copybtn{cursor:pointer;color:var(--accent);font-size:12px;margin-left:6px;background:none;border:none;padding:0;font-weight:600;}
+  .day-group{margin-bottom:16px;}
+  .day-group h4{font-size:13px;color:var(--muted);margin:0 0 6px;text-transform:capitalize;}
+  .empty{color:var(--muted);font-size:14px;padding:24px;text-align:center;background:var(--panel);border:1px dashed var(--border);border-radius:12px;}
+  .copybtn{cursor:pointer;color:var(--accent2);font-size:12px;margin-left:6px;background:none;border:none;padding:0;font-weight:600;}
   .retorno-actions button{margin-left:4px;}
+  .search-hint{color:var(--muted);font-size:12px;margin-bottom:8px;}
+
+  footer{margin-top:34px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;}
+  #footerNote{color:var(--muted);}
+  #footerNote.erro{color:var(--red);font-weight:700;}
 </style>
 </head>
 <body>
+<div class="container">
 
-<h1>Contador de Chamados</h1>
-<div class="sub">Backup automático em JSON (baixa sozinho, sem precisar clicar). Ao virar o mês, chamados já resolvidos/transferidos são arquivados e a lista começa limpa; os que ainda estão em andamento continuam aparecendo.</div>
+<header>
+  <h1>🎫 Contador de Chamados</h1>
+  <span class="tagline">Salvamento automático · cada mês vira uma aba · números repetidos são avisados</span>
+</header>
 
 <div class="grid" id="summaryCards"></div>
 
-<form class="entry" id="entryForm">
-  <div class="field">
-    <label>Número do chamado</label>
-    <input id="numero" autocomplete="off" placeholder="Cole ou digite o número" required>
-  </div>
-  <div class="field">
-    <label>Status</label>
-    <select id="status">
-      <option value="andamento" selected>Em andamento</option>
-      <option value="aguardando">Aguardando solicitante</option>
-      <option value="resolvido">Resolvido</option>
-      <option value="transferido">Transferido de fila</option>
-    </select>
-  </div>
-  <div class="field" id="filaField" style="display:none;">
-    <label>Fila destino</label>
-    <input id="fila" placeholder="Ex: N2 Redes">
-  </div>
-  <div class="field" id="retornoField">
-    <label>Agendar retorno (opcional)</label>
-    <input type="datetime-local" id="retorno">
-  </div>
-  <div class="field">
-    <label>Observação (opcional)</label>
-    <input id="obs" placeholder="Nota rápida">
-  </div>
-  <button type="submit">Adicionar</button>
-</form>
+<div class="panel">
+  <h2>➕ Novo chamado</h2>
+  <form class="entry" id="entryForm">
+    <div class="field">
+      <label>Número do chamado</label>
+      <input id="numero" autocomplete="off" placeholder="Cole ou digite e aperte Enter" required>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <select id="status">
+        <option value="andamento" selected>Em andamento</option>
+        <option value="aguardando">Aguardando solicitante</option>
+        <option value="resolvido">Resolvido</option>
+        <option value="transferido">Transferido de fila</option>
+      </select>
+    </div>
+    <div class="field" id="filaField" style="display:none;">
+      <label>Fila destino</label>
+      <input id="fila" placeholder="Ex: N2 Redes">
+    </div>
+    <div class="field" id="retornoField">
+      <label>Agendar retorno (opcional)</label>
+      <input type="datetime-local" id="retorno">
+    </div>
+    <div class="field">
+      <label>Observação (opcional)</label>
+      <input id="obs" placeholder="Nota rápida">
+    </div>
+    <button type="submit">Adicionar</button>
+    <div class="dup-warning" id="dupWarning"></div>
+  </form>
+</div>
 
 <section>
-  <h2>Chamados <button class="secondary small" id="enableAlerts">🔔 Ativar som e notificações</button></h2>
-  <input id="searchNum" placeholder="Buscar por número do chamado..." style="width:100%;margin-bottom:12px;">
+  <div class="tabs" id="monthTabs"></div>
+  <input id="searchNum" placeholder="🔍 Buscar por número do chamado (procura em todos os meses)…">
   <div id="lista"></div>
 </section>
 
-<div class="toolbar">
-  <button class="secondary small" id="importJson">Importar Backup</button>
-  <button class="danger small" id="clearAll">Limpar tudo</button>
-  <input type="file" id="fileInput" accept=".json" style="display:none;">
-</div>
+<footer>
+  <span id="footerNote">—</span>
+  <div style="display:flex;gap:8px;">
+    <button class="green small" id="btnRelatorio">📄 Relatório do mês</button>
+    <button class="danger small" id="clearAll">Limpar tudo</button>
+  </div>
+</footer>
 
+</div>
 <script>
 const KEY = 'chamados_v1';
+const LAST_BACKUP_KEY = 'chamados_lastBackup';
+const STATUS_LABELS = {andamento:'Em andamento', aguardando:'Aguardando solicitante', resolvido:'Resolvido', transferido:'Transferido'};
 
-function load(){
+// serverMode = aberto pelo "Abrir Contador.bat": tudo é salvo automaticamente
+// em chamados.json na pasta de rede, com backup diário — nenhuma ação manual.
+let serverMode = false;
+let serverOk = false;
+let entries = [];
+let activeMonth = new Date().toISOString().slice(0,7);
+let searchTerm = '';
+
+function loadLocal(){
   try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; }
 }
-function save(data){ localStorage.setItem(KEY, JSON.stringify(data)); }
-
-function downloadJson(data, filename){
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
+function saveLocalCache(){
+  try{ localStorage.setItem(KEY, JSON.stringify(entries)); }catch(e){}
 }
 
-let entries = load();
-checkMonthRollover();
-
-function checkMonthRollover(){
-  const nowMonth = new Date().toISOString().slice(0,7);
-  const activeMonth = localStorage.getItem('chamados_activeMonth');
-  if(!activeMonth){
-    localStorage.setItem('chamados_activeMonth', nowMonth);
-    return;
+function persist(){
+  saveLocalCache();
+  if(serverMode){
+    fetch('/api/save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(entries)
+    }).then(r=>{ serverOk = r.ok; refreshFooter(); })
+      .catch(()=>{ serverOk = false; refreshFooter(); });
+  } else {
+    autoBackupNavegador();
   }
-  if(activeMonth === nowMonth) return;
-  const ABERTOS = ['andamento','aguardando'];
-  const finalizados = entries.filter(e=>!ABERTOS.includes(e.status));
-  const emAberto = entries.filter(e=>ABERTOS.includes(e.status));
-  if(finalizados.length){
-    downloadJson(finalizados, 'chamados_'+activeMonth+'.json');
-    const year = activeMonth.slice(0,4);
-    const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
-    stats[year] = stats[year] || {resolvidos:0, transferidos:0};
-    stats[year].resolvidos += finalizados.filter(e=>e.status==='resolvido').length;
-    stats[year].transferidos += finalizados.filter(e=>e.status==='transferido').length;
-    localStorage.setItem('chamados_archiveStats', JSON.stringify(stats));
-  }
-  entries = emAberto;
-  save(entries);
-  localStorage.setItem('chamados_activeMonth', nowMonth);
 }
 
-function archiveStatsForYear(year){
-  const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
-  return stats[year] || {resolvidos:0, transferidos:0};
-}
-function archiveStatsAll(){
-  const stats = JSON.parse(localStorage.getItem('chamados_archiveStats')||'{}');
-  let resolvidos=0, transferidos=0;
-  Object.values(stats).forEach(s=>{ resolvidos+=s.resolvidos; transferidos+=s.transferidos; });
-  return {resolvidos, transferidos};
+async function initData(){
+  try{
+    const r = await fetch('/api/load', {cache:'no-store'});
+    if(!r.ok) throw 0;
+    const serverEntries = await r.json();
+    serverMode = true; serverOk = true;
+    entries = Array.isArray(serverEntries) ? serverEntries : [];
+    // dados que existam só neste navegador entram automaticamente na rede (sem duplicar)
+    const local = loadLocal();
+    let added = 0;
+    local.forEach(x=>{
+      if(x && x.id && !entries.some(e=>e.id===x.id)){ entries.push(x); added++; }
+    });
+    if(added > 0) persist(); else saveLocalCache();
+  }catch(e){
+    serverMode = false; serverOk = false;
+    entries = loadLocal();
+  }
+  renderAll();
+  checkAlarms();
 }
 
 function fmtDateTime(iso){
@@ -167,88 +203,139 @@ function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()=
 function sameMonth(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth(); }
 function sameYear(a,b){ return a.getFullYear()===b.getFullYear(); }
 
+/* ===== backup silencioso (só quando aberto sem o .bat) ===== */
+function autoBackupNavegador(){
+  if(!entries.length) return;
+  const iso = localStorage.getItem(LAST_BACKUP_KEY);
+  const last = iso ? new Date(iso) : null;
+  if(last && sameDay(last, new Date())) return;
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'chamados_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+}
+
+function refreshFooter(){
+  const note = document.getElementById('footerNote');
+  if(serverMode && serverOk){
+    note.className = '';
+    note.textContent = '🟢 Salvamento automático na pasta de rede · backup diário automático';
+  } else if(serverMode && !serverOk){
+    note.className = 'erro';
+    note.textContent = '🔴 Falha ao salvar na rede! Os dados estão guardados neste navegador — verifique a conexão com a pasta de rede.';
+  } else {
+    note.className = '';
+    note.textContent = '🟡 Aberto sem o "Abrir Contador.bat" — salvando só neste navegador (um backup é baixado automaticamente 1× por dia).';
+  }
+}
+
+/* ================= CONTAGEM ================= */
 function counts(filterFn){
   const filtered = entries.filter(e => filterFn(new Date(e.criadoEm)));
-  const resolvidos = filtered.filter(e=>e.status==='resolvido').length;
-  const transferidos = filtered.filter(e=>e.status==='transferido').length;
-  const andamento = filtered.filter(e=>e.status==='andamento').length;
-  const aguardando = filtered.filter(e=>e.status==='aguardando').length;
-  return { total: filtered.length, resolvidos, transferidos, andamento, aguardando };
+  return {
+    total: filtered.length,
+    resolvidos: filtered.filter(e=>e.status==='resolvido').length,
+    transferidos: filtered.filter(e=>e.status==='transferido').length,
+    andamento: filtered.filter(e=>e.status==='andamento').length,
+    aguardando: filtered.filter(e=>e.status==='aguardando').length
+  };
 }
 
 function renderSummary(){
   const now = new Date();
-  const hoje = counts(d=>sameDay(d,now));
-  const mes = counts(d=>sameMonth(d,now));
-
-  const liveAno = counts(d=>sameYear(d,now));
-  const archAno = archiveStatsForYear(String(now.getFullYear()));
-  const ano = {
-    total: liveAno.total + archAno.resolvidos + archAno.transferidos,
-    resolvidos: liveAno.resolvidos + archAno.resolvidos,
-    transferidos: liveAno.transferidos + archAno.transferidos,
-    andamento: liveAno.andamento,
-    aguardando: liveAno.aguardando
-  };
-
-  const liveGeral = counts(()=>true);
-  const archGeral = archiveStatsAll();
-  const geral = {
-    total: liveGeral.total + archGeral.resolvidos + archGeral.transferidos,
-    resolvidos: liveGeral.resolvidos + archGeral.resolvidos,
-    transferidos: liveGeral.transferidos + archGeral.transferidos,
-    andamento: liveGeral.andamento,
-    aguardando: liveGeral.aguardando
-  };
-
   const cards = [
-    ['Hoje', hoje], ['Este mês', mes], ['Este ano', ano], ['Total geral', geral]
+    ['Hoje', counts(d=>sameDay(d,now)), ''],
+    ['Este mês', counts(d=>sameMonth(d,now)), 'c2'],
+    ['Este ano', counts(d=>sameYear(d,now)), 'c3'],
+    ['Total geral', counts(()=>true), 'c4']
   ];
-  document.getElementById('summaryCards').innerHTML = cards.map(([label,c])=>`
-    <div class="card">
+  document.getElementById('summaryCards').innerHTML = cards.map(([label,c,cls])=>`
+    <div class="card ${cls}">
       <h3>${label}</h3>
       <div class="big">${c.total}</div>
-      <div class="rows"><span>Andamento: <b>${c.andamento}</b></span><span>Aguardando: <b>${c.aguardando}</b></span><span>Resolvidos: <b>${c.resolvidos}</b></span><span>Transferidos: <b>${c.transferidos}</b></span></div>
+      <div class="rows">
+        <span>Andamento <b>${c.andamento}</b></span>
+        <span>Aguardando <b>${c.aguardando}</b></span>
+        <span>Resolvidos <b>${c.resolvidos}</b></span>
+        <span>Transferidos <b>${c.transferidos}</b></span>
+      </div>
     </div>
   `).join('');
 }
 
-let searchTerm = '';
+/* ================= LISTA ================= */
+function getMonthsList(){
+  const set = new Set(entries.map(e=>e.criadoEm.slice(0,7)));
+  set.add(new Date().toISOString().slice(0,7));
+  return Array.from(set).sort().reverse();
+}
+
+function monthLabel(m){
+  const [y,mo] = m.split('-').map(Number);
+  const d = new Date(y, mo-1, 1);
+  const label = d.toLocaleDateString('pt-BR', {month:'long', year:'numeric'});
+  return label.charAt(0).toUpperCase()+label.slice(1);
+}
+
+function renderTabs(){
+  const months = getMonthsList();
+  if(!months.includes(activeMonth)) activeMonth = months[0];
+  document.getElementById('monthTabs').innerHTML = months.map(m=>
+    `<button type="button" class="tab ${m===activeMonth?'active':''}" onclick="selectMonth('${m}')">${monthLabel(m)}</button>`
+  ).join('');
+}
+
+function selectMonth(m){
+  activeMonth = m;
+  renderTabs();
+  renderLista();
+}
+
+function visibleEntries(){
+  const term = searchTerm.trim().toLowerCase();
+  if(term) return entries.filter(e=>e.numero.toLowerCase().includes(term));
+  return entries.filter(e=>e.criadoEm.slice(0,7)===activeMonth);
+}
 
 function renderLista(){
   const el = document.getElementById('lista');
   const term = searchTerm.trim().toLowerCase();
-  const filtered = term ? entries.filter(e => e.numero.toLowerCase().includes(term)) : entries;
-  if(!filtered.length){
-    el.innerHTML = '<div class="empty">'+(term ? 'Nenhum chamado encontrado.' : 'Nenhum chamado registrado.')+'</div>';
+  const list = visibleEntries();
+  if(!list.length){
+    el.innerHTML = '<div class="empty">'+(term ? 'Nenhum chamado encontrado com esse número.' : 'Nenhum chamado neste mês ainda.')+'</div>';
     return;
   }
   const now = new Date();
   const byDay = {};
-  filtered.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm)).forEach(e=>{
+  list.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm)).forEach(e=>{
     const key = fmtDate(e.criadoEm);
     (byDay[key] = byDay[key] || []).push(e);
   });
-  el.innerHTML = Object.keys(byDay).map(day=>{
+  const hint = term ? '<div class="search-hint">Resultado da busca em todos os meses.</div>' : '';
+  el.innerHTML = hint + Object.keys(byDay).map(day=>{
     const rows = byDay[day].map(e=>{
       const overdue = !!(e.status!=='transferido' && e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now);
       let retornoCell;
       if(e.status==='transferido'){
         retornoCell = '—';
       } else if(e.encerradoEm){
-        retornoCell = '<span class="badge encerrado">Encerrado '+fmtDateTime(e.encerradoEm)+'</span>';
+        retornoCell = '<span class="badge">Encerrado '+fmtDateTime(e.encerradoEm)+'</span>';
       } else if(e.retornoEm){
         retornoCell = (overdue ? '<b style="color:var(--red)">Venceu '+fmtDateTime(e.retornoEm)+'</b>' : fmtDateTime(e.retornoEm))
           + '<span class="retorno-actions">'
-          + '<button class="secondary small" onclick="encerrar(\''+e.id+'\')">Encerrar</button>'
-          + '<button class="secondary small" onclick="adiar(\''+e.id+'\')">Adiar 1h</button>'
+          + '<button type="button" class="secondary small" onclick="encerrar(\''+e.id+'\')">Encerrar</button>'
+          + '<button type="button" class="secondary small" onclick="adiar(\''+e.id+'\')">Adiar 1h</button>'
           + '</span>';
       } else {
         retornoCell = '—';
       }
       return `<tr class="${overdue?'overdue':''}">
         <td>${new Date(e.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</td>
-        <td>${e.numero}<button class="copybtn" onclick="copyNum('${e.numero}')">copiar</button></td>
+        <td><b>${e.numero}</b><button type="button" class="copybtn" onclick="copyNum('${e.numero}')">copiar</button></td>
         <td>
           <select class="statusSelect ${e.status}" onchange="changeStatus('${e.id}', this.value)">
             <option value="andamento" ${e.status==='andamento'?'selected':''}>Em andamento</option>
@@ -260,7 +347,7 @@ function renderLista(){
         <td>${e.fila||''}</td>
         <td>${retornoCell}</td>
         <td>${e.obs||''}</td>
-        <td><button class="secondary small" onclick="removeEntry('${e.id}')">Excluir</button></td>
+        <td><button type="button" class="secondary small" onclick="removeEntry('${e.id}')">Excluir</button></td>
       </tr>`;
     }).join('');
     return `<div class="day-group"><h4>${day}</h4><table>
@@ -269,18 +356,155 @@ function renderLista(){
   }).join('');
 }
 
-function renderAll(){ renderSummary(); renderLista(); }
+function renderAll(){ renderSummary(); renderTabs(); renderLista(); refreshFooter(); }
 
-function beep(){
+/* ================= RELATÓRIO MENSAL (PDF / Word) ================= */
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function gerarRelatorio(){
+  const mes = activeMonth;
+  const label = monthLabel(mes);
+  const list = entries
+    .filter(e=>e.criadoEm.slice(0,7)===mes)
+    .sort((a,b)=> new Date(a.criadoEm)-new Date(b.criadoEm));
+  if(!list.length){ alert('Nenhum chamado em '+label+' para gerar relatório.'); return; }
+
+  const c = {
+    total: list.length,
+    andamento: list.filter(e=>e.status==='andamento').length,
+    aguardando: list.filter(e=>e.status==='aguardando').length,
+    resolvidos: list.filter(e=>e.status==='resolvido').length,
+    transferidos: list.filter(e=>e.status==='transferido').length
+  };
+
+  const porDia = {};
+  list.forEach(e=>{
+    const k = new Date(e.criadoEm).toLocaleDateString('pt-BR');
+    porDia[k] = (porDia[k]||0)+1;
+  });
+  const linhasDia = Object.keys(porDia).map(d=>
+    '<tr><td>'+d+'</td><td style="text-align:center">'+porDia[d]+'</td></tr>').join('');
+
+  const linhas = list.map(e=>
+    '<tr>'+
+    '<td>'+new Date(e.criadoEm).toLocaleDateString('pt-BR')+'</td>'+
+    '<td>'+new Date(e.criadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</td>'+
+    '<td><b>'+esc(e.numero)+'</b></td>'+
+    '<td>'+esc(STATUS_LABELS[e.status]||e.status)+'</td>'+
+    '<td>'+esc(e.fila)+'</td>'+
+    '<td>'+esc(e.obs)+'</td>'+
+    '</tr>').join('');
+
+  const estilos = '<style id="estilos">'+
+    'body{font-family:Calibri,Segoe UI,Arial,sans-serif;color:#1a1a1a;margin:32px;background:#fff;}'+
+    'h1{font-size:22px;margin:0 0 2px;}'+
+    '.sub{color:#666;font-size:12px;margin-bottom:22px;}'+
+    'h2{font-size:15px;margin:24px 0 8px;border-bottom:2px solid #4f8cff;padding-bottom:4px;}'+
+    'table{border-collapse:collapse;width:100%;font-size:12px;}'+
+    'th,td{border:1px solid #bbb;padding:6px 8px;text-align:left;vertical-align:top;}'+
+    'th{background:#eef3fc;font-weight:700;}'+
+    '.resumo{display:table;width:100%;border-collapse:collapse;margin-bottom:4px;}'+
+    '.resumo div{display:table-cell;border:1px solid #bbb;padding:10px;text-align:center;}'+
+    '.resumo b{display:block;font-size:20px;}'+
+    '.acoes{margin-bottom:20px;padding:12px;background:#eef3fc;border-radius:8px;}'+
+    '.acoes button{font-family:inherit;font-size:13px;font-weight:700;padding:8px 16px;margin-right:8px;cursor:pointer;border:1px solid #4f8cff;border-radius:6px;background:#4f8cff;color:#fff;}'+
+    '.acoes button.b2{background:#fff;color:#2456b0;}'+
+    '.acoes span{font-size:11px;color:#666;}'+
+    '@media print{.acoes{display:none;}}'+
+    '</style>';
+
+  const corpo =
+    '<h1>Relatório de Chamados — '+esc(label)+'</h1>'+
+    '<div class="sub">Gerado em '+new Date().toLocaleString('pt-BR')+'</div>'+
+    '<h2>Resumo do mês</h2>'+
+    '<div class="resumo">'+
+    '<div><b>'+c.total+'</b>Total</div>'+
+    '<div><b>'+c.resolvidos+'</b>Resolvidos</div>'+
+    '<div><b>'+c.transferidos+'</b>Transferidos</div>'+
+    '<div><b>'+c.andamento+'</b>Em andamento</div>'+
+    '<div><b>'+c.aguardando+'</b>Aguardando</div>'+
+    '</div>'+
+    '<h2>Chamados por dia</h2>'+
+    '<table><tr><th>Dia</th><th style="text-align:center">Chamados</th></tr>'+linhasDia+'</table>'+
+    '<h2>Todos os chamados do mês ('+c.total+')</h2>'+
+    '<table><tr><th>Data</th><th>Hora</th><th>Número</th><th>Status</th><th>Fila</th><th>Observação</th></tr>'+
+    linhas+'</table>';
+
+  // documento do relatório (usado na visualização, no PDF e no Word)
+  const docHtml = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'+
+    '<title>Relatório '+esc(label)+'</title>'+estilos+'</head><body>'+corpo+'</body></html>';
+
+  // sobreposição na própria página — sem pop-up, nada é bloqueado
+  const overlay = document.createElement('div');
+  overlay.id = 'relatorioOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.65);display:flex;flex-direction:column;padding:24px;';
+  overlay.innerHTML =
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px;">'+
+    '<button id="relPdf">🖨 Salvar como PDF</button>'+
+    '<button id="relWord" class="secondary">⬇ Baixar Word</button>'+
+    '<button id="relFechar" class="danger">✖ Fechar</button>'+
+    '</div>'+
+    '<iframe id="relFrame" style="flex:1;border:none;border-radius:10px;background:#fff;width:100%;"></iframe>';
+  document.body.appendChild(overlay);
+  const frame = document.getElementById('relFrame');
+  frame.srcdoc = docHtml;
+
+  document.getElementById('relFechar').onclick = ()=> overlay.remove();
+  document.getElementById('relPdf').onclick = ()=>{
+    frame.contentWindow.focus();
+    frame.contentWindow.print(); // na janela de impressão, escolha "Salvar como PDF"
+  };
+  document.getElementById('relWord').onclick = ()=>{
+    const wordHtml = '﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" '+
+      'xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8">'+
+      estilos+'</head><body>'+corpo+'</body></html>';
+    const blob = new Blob([wordHtml], {type:'application/msword'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'relatorio_chamados_'+mes+'.doc';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  };
+}
+document.getElementById('btnRelatorio').addEventListener('click', gerarRelatorio);
+
+/* ================= ALERTAS ================= */
+// contexto de áudio compartilhado — os navegadores só liberam som depois
+// da primeira interação na página, então ele é ativado no primeiro clique/tecla
+let audioCtx = null;
+function ensureAudio(){
   try{
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 880;
-    g.gain.value = 0.15;
-    o.start();
-    setTimeout(()=>{ o.stop(); ctx.close(); }, 350);
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+  }catch(e){}
+}
+
+// som de sino: parciais inarmônicas com decaimento longo, duas badaladas
+function sino(){
+  try{
+    ensureAudio();
+    if(!audioCtx) return;
+    const badalada = (t0, volume)=>{
+      const parciais = [[880, 1], [1758, 0.55], [2640, 0.3], [3520, 0.12]];
+      parciais.forEach(([freq, peso])=>{
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sine';
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(volume * peso * 0.22, t0 + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.4);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(t0); o.stop(t0 + 1.5);
+      });
+    };
+    const agora = audioCtx.currentTime;
+    badalada(agora, 1);
+    badalada(agora + 0.45, 0.7);
   }catch(e){}
 }
 
@@ -291,39 +515,49 @@ function checkAlarms(){
     .filter(e => e.status!=='transferido' && e.retornoEm && !e.encerradoEm && new Date(e.retornoEm) <= now && !alertedIds.has(e.id))
     .forEach(e=>{
       alertedIds.add(e.id);
-      beep();
+      sino();
       if('Notification' in window && Notification.permission === 'granted'){
         new Notification('Chamado aguardando retorno', { body: 'Chamado '+e.numero+(e.fila?' · fila: '+e.fila:'') });
       }
+      renderLista();
     });
 }
 setInterval(checkAlarms, 30000);
-checkAlarms();
 
-document.getElementById('searchNum').addEventListener('input', (ev)=>{
-  searchTerm = ev.target.value;
-  renderLista();
-});
-
-document.getElementById('enableAlerts').addEventListener('click', ()=>{
-  beep();
-  if('Notification' in window && Notification.permission !== 'granted'){
-    Notification.requestPermission();
-  }
-});
-
-function maybeAutoBackup(){
-  const today = new Date().toISOString().slice(0,10);
-  const last = localStorage.getItem('chamados_lastBackup');
-  if(last !== today && entries.length){
-    downloadJson(entries, 'chamados_backup_'+today+'.json');
-    localStorage.setItem('chamados_lastBackup', today);
+// permissão de notificação: pedida automaticamente, sem botão.
+// O navegador exige mostrar o aviso "Permitir/Bloquear" — clique em Permitir uma única vez.
+function pedirPermissaoNotificacao(){
+  if('Notification' in window && Notification.permission === 'default'){
+    try{ Notification.requestPermission(); }catch(e){}
   }
 }
+pedirPermissaoNotificacao();
+// alguns navegadores só aceitam o pedido após uma interação — reforça no primeiro clique/tecla
+function primeiraInteracao(){
+  document.removeEventListener('pointerdown', primeiraInteracao);
+  document.removeEventListener('keydown', primeiraInteracao);
+  ensureAudio();
+  pedirPermissaoNotificacao();
+}
+document.addEventListener('pointerdown', primeiraInteracao);
+document.addEventListener('keydown', primeiraInteracao);
 
+/* ================= AÇÕES ================= */
 function copyNum(numero){
   navigator.clipboard && navigator.clipboard.writeText(numero);
 }
+
+function updateDupWarning(){
+  const el = document.getElementById('dupWarning');
+  const numero = document.getElementById('numero').value.trim().toLowerCase();
+  if(!numero){ el.style.display='none'; return; }
+  const matches = entries.filter(e=>e.numero.trim().toLowerCase()===numero);
+  if(!matches.length){ el.style.display='none'; return; }
+  const last = matches.slice().sort((a,b)=> new Date(b.criadoEm)-new Date(a.criadoEm))[0];
+  el.textContent = '⚠ Este número já foi cadastrado '+matches.length+'x — último em '+fmtDateTime(last.criadoEm)+' ('+STATUS_LABELS[last.status]+')';
+  el.style.display = 'block';
+}
+document.getElementById('numero').addEventListener('input', updateDupWarning);
 
 function changeStatus(id, newStatus){
   const e = entries.find(x=>x.id===id);
@@ -336,12 +570,12 @@ function changeStatus(id, newStatus){
     }
     e.retornoEm = null;
   }
-  save(entries); renderAll();
+  persist(); renderAll();
 }
 
 function encerrar(id){
   const e = entries.find(x=>x.id===id);
-  if(e){ e.encerradoEm = new Date().toISOString(); save(entries); renderAll(); }
+  if(e){ e.encerradoEm = new Date().toISOString(); persist(); renderAll(); }
 }
 function adiar(id){
   const e = entries.find(x=>x.id===id);
@@ -349,13 +583,13 @@ function adiar(id){
     const base = e.retornoEm ? new Date(e.retornoEm) : new Date();
     base.setHours(base.getHours()+1);
     e.retornoEm = base.toISOString();
-    save(entries); renderAll();
+    persist(); renderAll();
   }
 }
 function removeEntry(id){
   if(!confirm('Excluir este registro?')) return;
   entries = entries.filter(e=>e.id!==id);
-  save(entries); renderAll();
+  persist(); renderAll();
 }
 
 document.getElementById('status').addEventListener('change', (ev)=>{
@@ -381,43 +615,30 @@ document.getElementById('entryForm').addEventListener('submit', (ev)=>{
     retornoEm: retorno ? new Date(retorno).toISOString() : null,
     encerradoEm: null
   });
-  save(entries);
+  persist();
   document.getElementById('numero').value='';
   document.getElementById('fila').value='';
   document.getElementById('retorno').value='';
   document.getElementById('obs').value='';
+  document.getElementById('dupWarning').style.display='none';
+  activeMonth = new Date().toISOString().slice(0,7);
   document.getElementById('numero').focus();
   renderAll();
-  maybeAutoBackup();
 });
 
-document.getElementById('importJson').addEventListener('click', ()=>{
-  document.getElementById('fileInput').click();
-});
-document.getElementById('fileInput').addEventListener('change', (ev)=>{
-  const file = ev.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const imported = JSON.parse(reader.result);
-      if(Array.isArray(imported)){
-        entries = entries.concat(imported.filter(x=>x && x.id && !entries.some(e=>e.id===x.id)));
-        save(entries); renderAll();
-        alert('Backup importado com sucesso.');
-      }
-    }catch(e){ alert('Arquivo inválido.'); }
-  };
-  reader.readAsText(file);
+document.getElementById('searchNum').addEventListener('input', (ev)=>{
+  searchTerm = ev.target.value;
+  renderLista();
 });
 
 document.getElementById('clearAll').addEventListener('click', ()=>{
-  if(!confirm('Isso vai apagar TODOS os registros deste navegador. Tem certeza?')) return;
+  if(!confirm('Isso vai apagar TODOS os registros. Tem certeza?')) return;
+  if(!confirm('Confirmação final: apagar tudo mesmo? (Os backups diários na pasta backups\\ continuam guardados.)')) return;
   entries = [];
-  save(entries); renderAll();
+  persist(); renderAll();
 });
 
-renderAll();
+initData();
 </script>
 </body>
 </html>
